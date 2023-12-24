@@ -8,6 +8,7 @@ def get_env(name):
         secret = os.getenv(name)
 
         return secret
+
     except Exception as e:
         print(f"Error loading secrets: {e}")
 
