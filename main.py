@@ -1,14 +1,14 @@
+import argparse
+
 import pandas as pd
 import requests
 pd.set_option('display.max_columns', None)
 import os
 
-stat_category = 'PTS'
-season_type = 'Regular%20'
-season = 'All%20'
-website = 'https://stats.nba.com/'
-url = f'{website}stats/leagueLeaders?ActiveFlag=No&LeagueID=00&PerMode=Totals&Scope=S&' \
-      f'Season={season}Time&SeasonType={season_type}Season&StatCategory={stat_category}'
+def customize_nba_url(stats, season_type, season):
+    url = f'https://stats.nba.com/stats/leagueLeaders?ActiveFlag=No&LeagueID=00&PerMode=Totals&Scope=S&' \
+          f'Season={season}Time&SeasonType={season_type}Season&StatCategory={stats}'
+    return url
 
 def fetch_nba_all_time_scoring(url):
     r = requests.get(url=url).json()
@@ -57,6 +57,15 @@ def compare_tables(current_table, previous_table):
             print(f"{player_name} has become the {current_rank}{ordinal_suffix} ranked scorer all time in NBA history. "
                   f"He has scored {points:,} points in his career, passing: {', '.join(passed_players_names)}")
 
+def get_args():
+    parser = argparse.ArgumentParser(description='NBA All-Time Scoring Comparison')
+    parser.add_argument('--stats', default='PTS', help='Specify the statistic category (default: PTS)')
+    parser.add_argument('--season_type', default='Regular%20', help='Specify the season type (default: Regular)')
+    parser.add_argument('--season', default='All%20', help='Specify the season (default: All Time)')
+    args = parser.parse_args()
+
+    return args
+
 
 def main():
     """Keeping this commented out code for debugging purposes"""
@@ -79,6 +88,9 @@ def main():
     # }
     #
     # previous_table = pd.DataFrame(previous_data)
+
+    args = get_args()
+    url = customize_nba_url(stats=args.stats, season_type=args.season_type, season=args.season)
 
     # Get the file names
     current_week_filename = 'nba_all_time_scoring_current_week.csv'
