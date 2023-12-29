@@ -109,8 +109,12 @@ class NBA:
                 passed_players_names = passed_players['PLAYER_NAME'].tolist()
 
                 ordinal_suffix = self.get_ordinal_suffix(current_rank)
+                if len(passed_players_names) > 1:
+                    # If there are multiple passed players, add 'and' before the last name
+                    passed_players_names[-1] = 'and ' + passed_players_names[-1]
+
                 tweet = f"{player_name} has become the {current_rank}{ordinal_suffix} ranked scorer all time in NBA history. " \
-                    f"He has scored {points:,} points in his career, passing: {', '.join(passed_players_names)}"
+                        f"He has scored {points:,} points in his career, passing: {', '.join(passed_players_names)}"
 
                 payload = {"text": tweet}
 
