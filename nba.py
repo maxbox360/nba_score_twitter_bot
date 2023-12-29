@@ -89,7 +89,7 @@ class NBA:
         if os.path.exists(filename):
             return pd.read_csv(filename)
 
-    # TODO: Fix Tweet authentication issue
+
     def compare_tables(self, current_table, previous_table):
         if previous_table is None:
             print("No previous data found. Saving current data.")
@@ -125,8 +125,8 @@ class NBA:
                 )
 
                 if response.status_code != 201:
-                    raise Exception(
-                        "Request returned an error: {} {}".format(response.status_code, response.text)
+                    raise ValueError(
+                        f"Failed to post tweet for {player_name}. Status Code: {response.status_code}. Response: {response.text}"
                     )
 
                 print("Response code: {}".format(response.status_code))
