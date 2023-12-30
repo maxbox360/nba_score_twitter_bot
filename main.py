@@ -1,6 +1,9 @@
-from nba import NBA
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from nba import NBA
+
 
 def get_env(name):
     try:
