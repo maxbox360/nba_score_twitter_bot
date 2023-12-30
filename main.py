@@ -22,6 +22,5 @@ if __name__ == "__main__":
     access_token = get_env('ACCESS_TOKEN')
     access_token_secret = get_env('TOKEN_SECRET')
 
-    nba = NBA(consumer_key=consumer_key, consumer_secret=consumer_secret,
-              access_token=access_token, token_secret=access_token_secret)
+    nba = NBA(consumer_key=consumer_key, consumer_secret=consumer_secret)
     nba.main()

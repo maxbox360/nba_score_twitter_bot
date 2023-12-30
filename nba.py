@@ -1,99 +1,30 @@
 import argparse
 
 import pandas as pd
-import requests
-from requests_oauthlib import OAuth1Session
+
+from nba_utils import NBAUtils
+from utils import Utils
 
 pd.set_option('display.max_columns', None)
-import os
 import json
 
 
 # noinspection PyMethodMayBeStatic
 class NBA:
 
-    def __init__(self, consumer_key, consumer_secret, access_token, token_secret):
+    def __init__(self, consumer_key, consumer_secret):
         # User-based authentication (API keys and access tokens)
-        self.consumer_key = consumer_key
-        self.consumer_secret = consumer_secret
-        self.access_token = access_token
-        self.token_secret = token_secret
+        self.nba_utils = NBAUtils()
+        self.utils = Utils(consumer_key, consumer_secret)
 
-        # Get request token
-        request_token_url = "https://api.twitter.com/oauth/request_token?oauth_callback=oob&x_auth_access_type=write"
-        oauth = OAuth1Session(consumer_key, client_secret=consumer_secret)
+        resource_owner_key, resource_owner_secret = self.utils.user_authentication()
+        verifier = self.utils.get_authorization_url(resource_owner_key)
+        access_token, access_token_secret = self.utils.get_access_token(resource_owner_key, resource_owner_secret, verifier)
+        self.oauth = self.utils.make_request(access_token, access_token_secret)
 
-        try:
-            fetch_response = oauth.fetch_request_token(request_token_url)
-        except ValueError:
-            print(
-                "There may have been an issue with the consumer_key or consumer_secret you entered."
-            )
-
-        resource_owner_key = fetch_response.get("oauth_token")
-        resource_owner_secret = fetch_response.get("oauth_token_secret")
-        print("Got OAuth token: %s" % resource_owner_key)
-
-        # Get authorization
-        base_authorization_url = "https://api.twitter.com/oauth/authorize"
-        authorization_url = oauth.authorization_url(base_authorization_url)
-        print("Please go here and authorize: %s" % authorization_url)
-        verifier = input("Paste the PIN here: ")
-
-        # Get the access token
-        access_token_url = "https://api.twitter.com/oauth/access_token"
-        oauth = OAuth1Session(
-            consumer_key,
-            client_secret=consumer_secret,
-            resource_owner_key=resource_owner_key,
-            resource_owner_secret=resource_owner_secret,
-            verifier=verifier,
-        )
-        oauth_tokens = oauth.fetch_access_token(access_token_url)
-
-        access_token = oauth_tokens["oauth_token"]
-        access_token_secret = oauth_tokens["oauth_token_secret"]
-
-        # Make the request
-        self.oauth = OAuth1Session(
-            consumer_key,
-            client_secret=consumer_secret,
-            resource_owner_key=access_token,
-            resource_owner_secret=access_token_secret,
-        )
-
-
-    def get_ordinal_suffix(self, number):
-        if 10 <= number % 100 <= 20:
-            suffix = 'th'
-        else:
-            suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(number % 10, 'th')
-        return suffix
-
-
-    def customize_nba_url(self, website, stats, season_type, season):
-        url = f'{website}/stats/leagueLeaders?ActiveFlag=No&LeagueID=00&PerMode=Totals&Scope=S&' \
-              f'Season={season}Time&SeasonType={season_type}Season&StatCategory={stats}'
-        return url
-
-    def fetch_nba_all_time_scoring(self, url):
-        r = requests.get(url=url).json()
-        table_headers = r['resultSet']['headers']
-        table = pd.DataFrame(r['resultSet']['rowSet'], columns=table_headers)
-
-        return table[:250]
-
-
-    def save_table_to_file(self, table, filename):
-        table.to_csv(filename, index=False)
-
-
-    def load_table_from_file(self, filename):
-        if os.path.exists(filename):
-            return pd.read_csv(filename)
 
     def process_passed_players(self, player_name, passed_players_names, current_rank, points):
-        ordinal_suffix = self.get_ordinal_suffix(current_rank)
+        ordinal_suffix = self.nba_utils.get_ordinal_suffix(current_rank)
         if len(passed_players_names) > 1:
             # If there are multiple passed players, add 'and' before the last name
             passed_players_names[-1] = 'and ' + passed_players_names[-1]
@@ -183,19 +114,19 @@ class NBA:
             season_type = 'Regular%20'
             season = 'ALL%20'
 
-            url = self.customize_nba_url(website=website, stats=stats, season_type=season_type, season=season)
+            url = self.nba_utils.customize_nba_url(website=website, stats=stats, season_type=season_type, season=season)
 
             # Get the file names
             current_week_filename = 'nba_all_time_scoring_current_week.csv'
             previous_week_filename = 'nba_all_time_scoring_previous_week.csv'
 
             # Create the new table and grab the previous week table
-            current_table = self.fetch_nba_all_time_scoring(url)
-            previous_table = self.load_table_from_file(previous_week_filename)
+            current_table = self.nba_utils.fetch_nba_all_time_scoring(url)
+            previous_table = self.nba_utils.load_table_from_file(previous_week_filename)
 
             # Save the new data to the current_week file
-            self.save_table_to_file(current_table, current_week_filename)
+            self.nba_utils.save_table_to_file(current_table, current_week_filename)
             self.compare_tables(current_table, previous_table)
 
             # Save this week's table to previous file, so we can compare next week
-            self.save_table_to_file(current_table, previous_week_filename)
+            self.nba_utils.save_table_to_file(current_table, previous_week_filename)
