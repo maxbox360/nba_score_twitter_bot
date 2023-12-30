@@ -1,10 +1,7 @@
 import argparse
-
 import pandas as pd
-
 from nba_utils import NBAUtils
 from utils import Utils
-
 pd.set_option('display.max_columns', None)
 import json
 
@@ -23,14 +20,19 @@ class NBA:
         self.oauth = self.utils.make_request(access_token, access_token_secret)
 
 
-    def process_passed_players(self, player_name, passed_players_names, current_rank, points):
+    def process_players_passed(self, player_name, players_passed_names, current_rank, points):
         ordinal_suffix = self.nba_utils.get_ordinal_suffix(current_rank)
-        if len(passed_players_names) > 1:
-            # If there are multiple passed players, add 'and' before the last name
-            passed_players_names[-1] = 'and ' + passed_players_names[-1]
 
-        tweet = f"{player_name} has become the {current_rank}{ordinal_suffix} ranked scorer all time in NBA history. " \
-                f"He has scored {points:,} points in his career, passing: {', '.join(passed_players_names)}"
+        if len(players_passed_names) == 1:
+            tweet = f"{player_name} has become the {current_rank}{ordinal_suffix} ranked scorer all time in NBA history. " \
+                    f"He has scored {points:,} points in his career, passing: {players_passed_names[0]}"
+        elif len(players_passed_names) == 2:
+            tweet = f"{player_name} has become the {current_rank}{ordinal_suffix} ranked scorer all time in NBA history. " \
+                    f"He has scored {points:,} points in his career, passing: {players_passed_names[0]} and {players_passed_names[1]}"
+        else:
+            all_passed_players = ', '.join(players_passed_names[:-1]) + f", and {players_passed_names[-1]}"
+            tweet = f"{player_name} has become the {current_rank}{ordinal_suffix} ranked scorer all time in NBA history. " \
+                    f"He has scored {points:,} points in his career, passing: {all_passed_players}"
 
         return tweet
 
@@ -40,9 +42,9 @@ class NBA:
         if len(previous_rank) > 0 and current_rank < previous_rank[0]:
             passed_players = previous_table[
                 (previous_table['PTS_RANK'] >= current_rank) & (previous_table['PTS_RANK'] < previous_rank[0])]
-            passed_players_names = passed_players['PLAYER_NAME'].tolist()
+            players_passed_names = passed_players['PLAYER_NAME'].tolist()
 
-            return passed_players_names
+            return players_passed_names
 
         return None
 
@@ -61,7 +63,7 @@ class NBA:
 
             passed_players = self.check_rank_changes(player_id, current_rank, previous_table)
             if passed_players:
-                tweet = self.process_passed_players(player_name, passed_players, current_rank, points)
+                tweet = self.process_players_passed(player_name, passed_players, current_rank, points)
                 payload = {"text": tweet}
 
                 # Making the request
