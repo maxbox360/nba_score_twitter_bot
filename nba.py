@@ -1,4 +1,6 @@
 import argparse
+import time
+
 import pandas as pd
 from nba_utils import NBAUtils
 from utils import Utils
@@ -54,6 +56,8 @@ class NBA:
             print("No previous data found. Saving current data.")
             return
 
+        tweets_to_post = []
+
         # Iterate through each player in the current table to find changes in ranking
         for _, row in current_table.iterrows():
             player_id = row['PLAYER_ID']
@@ -64,24 +68,34 @@ class NBA:
             passed_players = self.check_rank_changes(player_id, current_rank, previous_table)
             if passed_players:
                 tweet = self.process_players_passed(player_name, passed_players, current_rank, points)
-                payload = {"text": tweet}
+                tweets_to_post.append(tweet)
 
-                # Making the request
-                response = self.oauth.post(
-                    "https://api.twitter.com/2/tweets",
-                    json=payload,
+        # Reverse the order of tweets before posting
+        tweets_to_post.reverse()
+
+        for tweet in tweets_to_post:
+            payload = {"text": tweet}
+
+            # Making the request
+            response = self.oauth.post(
+                "https://api.twitter.com/2/tweets",
+                json=payload,
+            )
+
+            if response.status_code != 201:
+                raise ValueError(
+                    f"Failed to post tweet for {player_name}. Status Code: {response.status_code}. Response: {response.text}"
                 )
 
-                if response.status_code != 201:
-                    raise ValueError(
-                        f"Failed to post tweet for {player_name}. Status Code: {response.status_code}. Response: {response.text}"
-                    )
+            print("Response code: {}".format(response.status_code))
 
-                print("Response code: {}".format(response.status_code))
+            # Saving the response as JSON
+            json_response = response.json()
+            print(json.dumps(json_response, indent=4, sort_keys=True))
 
-                # Saving the response as JSON
-                json_response = response.json()
-                print(json.dumps(json_response, indent=4, sort_keys=True))
+            # Space tweets out instead of posting all in once batch
+            minutes = 60 * 5
+            time.sleep(minutes)
 
 
     def main(self):
@@ -90,7 +104,7 @@ class NBA:
         args = parser.parse_args()
         if args.debug:
             print("Debugging mode is active")
-            # Example of current week's table (replace this with your actual data)
+            # Example of current week table
             current_data = {
                 'PLAYER_ID': [1, 5, 2, 3, 4],
                 'PLAYER_NAME': ['LeBron James', 'Dirk Nowitzki', 'Karl Malone', 'Kobe Bryant', 'Michael Jordan'],
@@ -100,7 +114,7 @@ class NBA:
 
             current_table = pd.DataFrame(current_data)
 
-            # Example of previous week's table (replace this with your actual data)
+            # Example of current week table
             previous_data = {
                 'PLAYER_ID': [1, 2, 3, 4, 5],
                 'PLAYER_NAME': ['LeBron James', 'Karl Malone', 'Kobe Bryant', 'Michael Jordan', 'Dirk Nowitzki'],
