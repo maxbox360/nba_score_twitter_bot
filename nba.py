@@ -169,16 +169,16 @@ class NBA:
             url = self.nba_utils.customize_nba_url(info)
 
             # Get the file names
-            new_data = 'nba_all_time_scoring_current_week.csv'
+            updated_data = 'nba_all_time_scoring_current_week.csv'
             old_data = 'nba_all_time_scoring_previous_week.csv'
 
             # Create the new table and grab the previous week table
             new_table = self.nba_utils.fetch_nba_data(url)
             old_table = self.nba_utils.load_table(old_data)
 
-            # Save the new data to the current_week file
-            self.nba_utils.save_table(new_table, new_data)
+            # Update the current_week file with the new data
+            self.nba_utils.update_table(table=new_table, filename=updated_data)
             self.compose_tweet(new_table, old_table)
 
-            # Save this week's table to previous file, so we can compare next week
-            self.nba_utils.save_table(new_table, old_data)
+            # Update the previous file with this week's table, so we can compare next week
+            self.nba_utils.update_table(table=new_table, filename=old_data)

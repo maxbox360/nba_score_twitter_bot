@@ -84,7 +84,7 @@ class NBAUtils:
 
 
     @staticmethod
-    def save_table(table, filename):
+    def update_table(table, filename):
         table.to_csv(filename, index=False)
 
 
