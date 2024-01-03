@@ -169,8 +169,8 @@ class NBA:
             url = self.nba_utils.customize_nba_url(info)
 
             # Get the file names
-            updated_data = 'nba_all_time_scoring_current_week.csv'
-            old_data = 'nba_all_time_scoring_previous_week.csv'
+            updated_data = 'new_nba_scoring_data.csv'
+            old_data = 'old_nba_scoring_data.csv'
 
             # Create the new table and grab the previous week table
             new_table = self.nba_utils.fetch_nba_data(url)
