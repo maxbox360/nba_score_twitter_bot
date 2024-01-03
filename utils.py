@@ -8,7 +8,7 @@ class Utils:
         self.oauth = None
 
 
-    def user_authentication(self):
+    def user_auth(self):
         # Get request token
         request_token_url = "https://api.twitter.com/oauth/request_token?oauth_callback=oob&x_auth_access_type=write"
         oauth = OAuth1Session(self.consumer_key, client_secret=self.consumer_secret)
@@ -27,7 +27,7 @@ class Utils:
         return resource_owner_key, resource_owner_secret
 
 
-    def get_authorization_url(self, resource_owner_key):
+    def get_auth_url(self, resource_owner_key):
         base_authorization_url = "https://api.twitter.com/oauth/authorize"
         oauth = OAuth1Session(self.consumer_key, client_secret=self.consumer_secret,
                               resource_owner_key=resource_owner_key)
