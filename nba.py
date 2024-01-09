@@ -1,4 +1,5 @@
 import argparse
+import sys
 import time
 
 import pandas as pd
@@ -20,6 +21,8 @@ class NBA:
         parser.add_argument('--debug', action='store_true', help='Enable debugging mode')
         self.args = parser.parse_args()
         self.oauth = None
+
+        self.tweets = []
 
         if self.args.debug:
             print("Debugging\n")
@@ -98,6 +101,10 @@ class NBA:
         json_response = response.json()
         print(json.dumps(json_response, indent=4, sort_keys=True))
 
+        if not self.tweets:
+            print("There are no more tweets to post. Exiting")
+            sys.exit()
+
         # Space tweets out instead of posting all in one batch
         minutes = 60 * 5
         time.sleep(minutes)
@@ -106,8 +113,6 @@ class NBA:
         if old_table is None:
             print("No previous data found. Saving current data.")
             return
-
-        tweets = []
 
         # Iterate through each player in the current table to find changes in ranking
         for _, row in new_table.iterrows():
@@ -124,11 +129,11 @@ class NBA:
                                                      player_info['old_table'])
             if passed_players:
                 tweet = self.process_passed_players(player_info, passed_players)
-                tweets.append(tweet)
+                self.tweets.append(tweet)
 
         # Reverse the order of tweets before posting
-        tweets.reverse()
-        for tweet in tweets:
+        self.tweets.reverse()
+        for tweet in self.tweets:
             payload = {"text": tweet}
             if self.args.debug:
                 print(tweet)
