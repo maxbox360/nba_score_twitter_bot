@@ -3,6 +3,8 @@ import sys
 import time
 
 import pandas as pd
+import requests
+
 from nba_utils import NBAUtils
 from utils import Utils
 pd.set_option('display.max_columns', None)
@@ -84,22 +86,28 @@ class NBA:
         return None
 
     def post_tweet(self, payload):
-        # Making the request
-        response = self.oauth.post(
-            "https://api.twitter.com/2/tweets",
-            json=payload,
-        )
-
-        if response.status_code != 201:
-            raise ValueError(
-                f"Failed to post tweet. Status Code: {response.status_code}. Response: {response.text}"
+        try:
+            # Making the request
+            response = self.oauth.post(
+                "https://api.twitter.com/2/tweets",
+                json=payload,
             )
+            response.raise_for_status()  # Raise HTTPError for bad responses
 
-        print("Response code: {}".format(response.status_code))
+            print("Tweet posted successfully. Response code: {}".format(response.status_code))
 
-        # Saving the response as JSON
-        json_response = response.json()
-        print(json.dumps(json_response, indent=4, sort_keys=True))
+            # Saving the response as JSON
+            json_response = response.json()
+            print(json.dumps(json_response, indent=4, sort_keys=True))
+
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 403:
+                print("403 error: Skipped tweet due to repeated content")
+                return
+            else:
+                raise ValueError(
+                    f"Failed to post tweet. Status Code: {e.response.status_code}. Response: {e.response.text}"
+                )
 
         if not self.tweets:
             print("There are no more tweets to post. Exiting")
