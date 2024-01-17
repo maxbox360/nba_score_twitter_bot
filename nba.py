@@ -114,7 +114,7 @@ class NBA:
             sys.exit()
 
         # Space tweets out instead of posting all in one batch
-        minutes = 60 * 5
+        minutes = 60 * 3
         time.sleep(minutes)
 
     def compose_tweet(self, new_table, old_table):
