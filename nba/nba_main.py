@@ -5,10 +5,11 @@ import time
 import pandas as pd
 import requests
 
-from nba_utils import NBAUtils
+from nba.nba_utils import NBAUtils
 from utils.calculate_ranking import PlayerRankings
 from utils.tweets import TweetComposition
 from utils.utils import Utils
+
 pd.set_option('display.max_columns', None)
 import json
 
@@ -23,7 +24,7 @@ class NBA:
         self.rankings = PlayerRankings()
         self.utils = Utils(consumer_key, consumer_secret)
 
-        parser = argparse.ArgumentParser(description="Running nba.py in Debug Mode")
+        parser = argparse.ArgumentParser(description="Running nba_main.py in Debug Mode")
         parser.add_argument('--debug', action='store_true', help='Enable debugging mode')
         self.args = parser.parse_args()
         self.oauth = None
