@@ -1,4 +1,5 @@
 import argparse
+import os.path
 import sys
 import time
 
@@ -203,8 +204,9 @@ class NBA:
             url = self.nba_utils.customize_nba_url(info)
 
             # Get the file names
-            updated_data = 'new_nba_scoring_data.csv'
-            old_data = 'old_nba_scoring_data.csv'
+            directory_path = os.path.dirname(os.path.realpath(__file__))
+            updated_data = os.path.join(directory_path, 'new_nba_scoring_data.csv')
+            old_data = os.path.join(directory_path, 'old_nba_scoring_data.csv')
 
             # Create the new table and grab the previous week table
             new_table = self.nba_utils.fetch_nba_data(url)
