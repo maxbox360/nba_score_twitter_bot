@@ -6,7 +6,9 @@ import pandas as pd
 import requests
 
 from nba_utils import NBAUtils
-from utils import Utils
+from utils.calculate_ranking import PlayerRankings
+from utils.tweets import TweetComposition
+from utils.utils import Utils
 pd.set_option('display.max_columns', None)
 import json
 
@@ -17,6 +19,8 @@ class NBA:
     def __init__(self, consumer_key, consumer_secret):
         # User-based authentication (API keys and access tokens)
         self.nba_utils = NBAUtils()
+        self.tweet_comp = TweetComposition()
+        self.rankings = PlayerRankings()
         self.utils = Utils(consumer_key, consumer_secret)
 
         parser = argparse.ArgumentParser(description="Running nba.py in Debug Mode")
@@ -43,14 +47,14 @@ class NBA:
         points = player_info['points']
         new_table = player_info['new_table']
 
-        ordinal_suffix = self.nba_utils.get_ordinal_suffix(player_info['current_rank'])
-        players_passed_info = self.nba_utils.calculate_passed_players_info(passed_players, points, new_table)
+        ordinal_suffix = self.rankings.get_ordinal_suffix(player_info['current_rank'])
+        players_passed_info = self.rankings.get_passed_player(passed_players, points, new_table)
 
         next_name, next_player_rank, difference_to_next \
-            = self.nba_utils.calculate_next_player_info(current_rank,
+            = self.rankings.get_next_player(current_rank,
                                                         points,
                                                         new_table)
-        next_ordinal_suffix = self.nba_utils.get_ordinal_suffix(next_player_rank)
+        next_ordinal_suffix = self.rankings.get_ordinal_suffix(next_player_rank)
 
         tweet_data = {
             'player_name': player_name,
@@ -65,11 +69,11 @@ class NBA:
         }
 
         if len(players_passed_info) == 1:
-            tweet = self.nba_utils.single_player_tweets(tweet_data)
+            tweet = self.tweet_comp.single_player_tweets(tweet_data)
         elif len(players_passed_info) == 2:
-            tweet = self.nba_utils.two_player_tweets(tweet_data)
+            tweet = self.tweet_comp.two_player_tweets(tweet_data)
         else:
-            tweet = self.nba_utils.multi_player_tweets(tweet_data)
+            tweet = self.tweet_comp.multi_player_tweets(tweet_data)
 
         return tweet
 
@@ -85,7 +89,7 @@ class NBA:
 
         return None
 
-    def post_tweet(self, payload):
+    def send_tweet(self, payload):
         try:
             # Making the request
             response = self.oauth.post(
@@ -113,15 +117,22 @@ class NBA:
             print("There are no more tweets to post. Exiting")
             sys.exit()
 
-        # Space tweets out instead of posting all in one batch
-        minutes = 60 * 3
-        time.sleep(minutes)
-
     def compose_tweet(self, new_table, old_table):
         if old_table is None:
             print("No previous data found. Saving current data.")
             return
 
+        self.collect_tweets(new_table, old_table)
+
+        # Check if there are any tweets before proceeding
+        if not self.tweets:
+            print("No tweets to post. Exiting")
+            return
+
+        self.publish_tweets()
+
+
+    def collect_tweets(self, new_table, old_table):
         # Iterate through each player in the current table to find changes in ranking
         for _, row in new_table.iterrows():
             player_info = {
@@ -139,14 +150,23 @@ class NBA:
                 tweet = self.process_passed_players(player_info, passed_players)
                 self.tweets.append(tweet)
 
+
+    def publish_tweets(self):
         # Reverse the order of tweets before posting
         self.tweets.reverse()
+
         for tweet in self.tweets:
             payload = {"text": tweet}
             if self.args.debug:
                 print(tweet)
             else:
-                self.post_tweet(payload)
+                self.send_tweet(payload)
+                if len(self.tweets) > 1:
+                    # Wait for 3 minutes between tweets
+                    minutes = 3 * 60
+                    time.sleep(minutes)
+
+        print("All tweets posted.")
 
 
     def main(self):
