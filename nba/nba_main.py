@@ -157,6 +157,7 @@ class NBA:
         # Reverse the order of tweets before posting
         self.tweets.reverse()
 
+        print(f"There are {len(self.tweets)} tweets to post")
         for tweet in self.tweets:
             payload = {"text": tweet}
             if self.args.debug:
@@ -165,7 +166,7 @@ class NBA:
                 self.send_tweet(payload)
                 if len(self.tweets) > 1:
                     # Wait for 3 minutes between tweets
-                    minutes = 3 * 60
+                    minutes = 10 * 60
                     time.sleep(minutes)
 
         print("All tweets posted.")
