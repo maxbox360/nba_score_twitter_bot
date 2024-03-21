@@ -32,12 +32,12 @@ class PlayerRankings:
                 next_player_pts = next_player['PTS'].values[0]
                 difference_to_next = f"{(next_player_pts - points + 1):,}"
             else:
-                next_name = 'No Player available'
-                next_player_rank = 0  # Set a default value or handle appropriately
-                difference_to_next = "N/A"  # Set a default value or handle appropriately
+                next_name = next_player['PLAYER_NAME'].values[0]
+                next_player_rank = next_player['PTS_RANK'].values[0]
+                next_player_pts = next_player['PTS'].values[0]
+                difference_to_next = f"{(next_player_pts - points + 1):,}"
 
             return next_name, next_player_rank, difference_to_next
         except IndexError:
-            # TODO: This is an issue with ties in the data.
             print("IndexError: Skipping to the next player.")
             return 'No Player available', 0, "N/A"

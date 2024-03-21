@@ -157,7 +157,7 @@ class NBA:
         # Reverse the order of tweets before posting
         self.tweets.reverse()
 
-        print(f"There are {len(self.tweets)} tweets to post")
+        print(f"There are {len(self.tweets)} tweets to post\n")
         for tweet in self.tweets:
             payload = {"text": tweet}
             if self.args.debug:
