@@ -2,7 +2,7 @@ import argparse
 import os.path
 import sys
 import time
-
+import json
 import pandas as pd
 import requests
 
@@ -12,10 +12,8 @@ from utils.tweets import TweetComposition
 from utils.utils import Utils
 
 pd.set_option('display.max_columns', None)
-import json
 
 
-# noinspection PyMethodMayBeStatic
 class NBA:
 
     def __init__(self, consumer_key, consumer_secret):
@@ -79,7 +77,6 @@ class NBA:
 
         return tweet
 
-
     def check_rank_changes(self, player_id, current_rank, old_table):
         previous_rank = old_table.loc[old_table['PLAYER_ID'] == player_id, 'PTS_RANK'].values
         if len(previous_rank) > 0 and current_rank < previous_rank[0]:
@@ -133,7 +130,6 @@ class NBA:
 
         self.publish_tweets()
 
-
     def collect_tweets(self, new_table, old_table):
         # Iterate through each player in the current table to find changes in ranking
         for _, row in new_table.iterrows():
@@ -152,7 +148,6 @@ class NBA:
                 tweet = self.process_passed_players(player_info, passed_players)
                 self.tweets.append(tweet)
 
-
     def publish_tweets(self):
         # Reverse the order of tweets before posting
         self.tweets.reverse()
@@ -166,11 +161,10 @@ class NBA:
                 self.send_tweet(payload)
                 if len(self.tweets) > 1:
                     # Wait for 3 minutes between tweets
-                    minutes = 10 * 60
+                    minutes = 5 * 60
                     time.sleep(minutes)
 
         print("All tweets posted.")
-
 
     def main(self):
         if self.args.debug:
