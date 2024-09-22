@@ -26,7 +26,6 @@ class Utils:
 
         return resource_owner_key, resource_owner_secret
 
-
     def get_auth_url(self, resource_owner_key):
         base_authorization_url = "https://api.twitter.com/oauth/authorize"
         oauth = OAuth1Session(self.consumer_key, client_secret=self.consumer_secret,
@@ -35,7 +34,6 @@ class Utils:
         print("Please go here and authorize: %s" % authorization_url)
         verifier = input("Paste the PIN here: ")
         return verifier
-
 
     def get_access_token(self, resource_owner_key, resource_owner_secret, verifier):
         access_token_url = "https://api.twitter.com/oauth/access_token"
@@ -46,7 +44,6 @@ class Utils:
         access_token = oauth_tokens["oauth_token"]
         access_token_secret = oauth_tokens["oauth_token_secret"]
         return access_token, access_token_secret
-
 
     def make_request(self, access_token, access_token_secret):
         oauth = self.oauth = OAuth1Session(self.consumer_key, client_secret=self.consumer_secret,

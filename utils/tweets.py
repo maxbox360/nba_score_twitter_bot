@@ -1,4 +1,3 @@
-from nba import nba_main
 class TweetComposition:
 
     @staticmethod
@@ -43,4 +42,3 @@ class TweetComposition:
                 f"He needs {tweet_data['difference_to_next']} points to pass {tweet_data['next_name']} "
                 f"for {tweet_data['next_player_rank']}{tweet_data['next_ordinal_suffix']} all time."
             )
-

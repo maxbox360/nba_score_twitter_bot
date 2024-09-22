@@ -161,7 +161,7 @@ class NBA:
                 self.send_tweet(payload)
                 if len(self.tweets) > 1:
                     # Wait for 3 minutes between tweets
-                    minutes = 5 * 60
+                    minutes = 3 * 60
                     time.sleep(minutes)
 
         print("All tweets posted.")
