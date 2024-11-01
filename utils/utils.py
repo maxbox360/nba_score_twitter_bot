@@ -7,7 +7,6 @@ class Utils:
         self.consumer_secret = consumer_secret
         self.oauth = None
 
-
     def user_auth(self):
         # Get request token
         request_token_url = "https://api.twitter.com/oauth/request_token?oauth_callback=oob&x_auth_access_type=write"
@@ -47,5 +46,5 @@ class Utils:
 
     def make_request(self, access_token, access_token_secret):
         oauth = self.oauth = OAuth1Session(self.consumer_key, client_secret=self.consumer_secret,
-                                   resource_owner_key=access_token, resource_owner_secret=access_token_secret)
+                                           resource_owner_key=access_token, resource_owner_secret=access_token_secret)
         return oauth
