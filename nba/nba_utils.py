@@ -11,7 +11,6 @@ class NBAUtils:
               f'Season={info["season"]}Time&SeasonType={info["season_type"]}Season&StatCategory={info["stats"]}'
         return url
 
-
     @staticmethod
     def fetch_nba_data(url):
         r = requests.get(url=url).json()
@@ -19,11 +18,9 @@ class NBAUtils:
         table = pd.DataFrame(r['resultSet']['rowSet'], columns=table_headers)
         return table[:250]
 
-
     @staticmethod
     def update_table(table, filename):
         table.to_csv(filename, index=False)
-
 
     @staticmethod
     def load_table(filename):
