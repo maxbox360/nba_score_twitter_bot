@@ -1,34 +1,72 @@
+def tied_player_names(tweet_data):
+    tied_players = tweet_data['next_name'].split(', ')
+    if len(tied_players) >= 3:
+        formatted_names = ', '.join(tied_players[:-1]) + ", and " + tied_players[-1]
+    elif len(tied_players) == 2:
+        formatted_names = " and ".join(tied_players)
+    else:
+        return tied_players
+    return formatted_names
+
+
 class TweetComposition:
 
     @staticmethod
     def single_player_tweets(tweet_data):
-        return (
-            f"{tweet_data['player_name']} has become the {tweet_data['current_rank']}{tweet_data['ordinal_suffix']} ranked scorer in NBA history. "
-            f"He has scored {tweet_data['points']:,} points in his career, passing: {tweet_data['players_passed_info'][0][0]}. \n\n"
-            f"He needs {tweet_data['difference_to_next']} points to pass {tweet_data['next_name']} "
-            f"for {tweet_data['next_player_rank']}{tweet_data['next_ordinal_suffix']} all time."
-        )
+        tied_players = tied_player_names(tweet_data)
+        if tied_players:
+            return (
+                f"{tweet_data['player_name']} has become the {tweet_data['current_rank']}{tweet_data['ordinal_suffix']} ranked scorer in NBA history. "
+                f"He has scored {tweet_data['points']:,} points in his career, passing: {tweet_data['players_passed_info'][0][0]}. \n\n"
+                f"He needs {tweet_data['difference_to_next']} points to pass {tied_players} "
+                f"for {tweet_data['next_player_rank']}{tweet_data['next_ordinal_suffix']} all time."
+            )
+        else:
+            return (
+                f"{tweet_data['player_name']} has become the {tweet_data['current_rank']}{tweet_data['ordinal_suffix']} ranked scorer in NBA history. "
+                f"He has scored {tweet_data['points']:,} points in his career, passing: {tweet_data['players_passed_info'][0][0]}. \n\n"
+                f"He needs {tweet_data['difference_to_next']} points to pass {tweet_data['next_name']} "
+                f"for {tweet_data['next_player_rank']}{tweet_data['next_ordinal_suffix']} all time."
+            )
 
     @staticmethod
     def two_player_tweets(tweet_data):
-        return (
-            f"{tweet_data['player_name']} has become the {tweet_data['current_rank']}{tweet_data['ordinal_suffix']} ranked scorer in NBA history. "
-            f"He has scored {tweet_data['points']:,} points in his career, passing: {tweet_data['players_passed_info'][0][0]} and {tweet_data['players_passed_info'][1][0]}. \n\n"
-            f"He needs {tweet_data['difference_to_next']} points to pass {tweet_data['next_name']} "
-            f"for {tweet_data['next_player_rank']}{tweet_data['next_ordinal_suffix']} all time."
-        )
+        tied_players = tied_player_names(tweet_data)
+        if tied_players:
+            return (
+                f"{tweet_data['player_name']} has become the {tweet_data['current_rank']}{tweet_data['ordinal_suffix']} ranked scorer in NBA history. "
+                f"He has scored {tweet_data['points']:,} points in his career, passing: {tweet_data['players_passed_info'][0][0]} and {tweet_data['players_passed_info'][1][0]}. \n\n"
+                f"He needs {tweet_data['difference_to_next']} points to pass {tied_players} "
+                f"for {tweet_data['next_player_rank']}{tweet_data['next_ordinal_suffix']} all time."
+            )
+        else:
+            return (
+                f"{tweet_data['player_name']} has become the {tweet_data['current_rank']}{tweet_data['ordinal_suffix']} ranked scorer in NBA history. "
+                f"He has scored {tweet_data['points']:,} points in his career, passing: {tweet_data['players_passed_info'][0][0]} and {tweet_data['players_passed_info'][1][0]}. \n\n"
+                f"He needs {tweet_data['difference_to_next']} points to pass {tweet_data['next_name']} "
+                f"for {tweet_data['next_player_rank']}{tweet_data['next_ordinal_suffix']} all time."
+            )
 
     @staticmethod
     def multi_player_tweets(tweet_data):
+        tied_players = tied_player_names(tweet_data)
         all_players = ', '.join(names[0] for names in tweet_data['players_passed_info'][
                                                       :-1]) + f", and {tweet_data['players_passed_info'][-1][0]}"
 
-        tweet = (
-            f"{tweet_data['player_name']} has become the {tweet_data['current_rank']}{tweet_data['ordinal_suffix']} ranked scorer in NBA history. "
-            f"He has scored {tweet_data['points']:,} points in his career, passing: {all_players}. \n\n"
-            f"He needs {tweet_data['difference_to_next']} points to pass {tweet_data['next_name']} "
-            f"for {tweet_data['next_player_rank']}{tweet_data['next_ordinal_suffix']} all time."
-        )
+        if tied_players:
+            tweet = (
+                f"{tweet_data['player_name']} has become the {tweet_data['current_rank']}{tweet_data['ordinal_suffix']} ranked scorer in NBA history. "
+                f"He has scored {tweet_data['points']:,} points in his career, passing: {all_players}. \n\n"
+                f"He needs {tweet_data['difference_to_next']} points to pass {tied_players} "
+                f"for {tweet_data['next_player_rank']}{tweet_data['next_ordinal_suffix']} all time."
+            )
+        else:
+            tweet = (
+                f"{tweet_data['player_name']} has become the {tweet_data['current_rank']}{tweet_data['ordinal_suffix']} ranked scorer in NBA history. "
+                f"He has scored {tweet_data['points']:,} points in his career, passing: {all_players}. \n\n"
+                f"He needs {tweet_data['difference_to_next']} points to pass {tweet_data['next_name']} "
+                f"for {tweet_data['next_player_rank']}{tweet_data['next_ordinal_suffix']} all time."
+            )
 
         # Check if the tweet exceeds 280 characters
         if len(tweet) <= 280:
