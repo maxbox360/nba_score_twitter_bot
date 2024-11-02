@@ -1,3 +1,5 @@
+import sys
+
 from requests_oauthlib import OAuth1Session
 
 
@@ -36,13 +38,22 @@ class Utils:
 
     def get_access_token(self, resource_owner_key, resource_owner_secret, verifier):
         access_token_url = "https://api.twitter.com/oauth/access_token"
+
         oauth = OAuth1Session(self.consumer_key, client_secret=self.consumer_secret,
                               resource_owner_key=resource_owner_key, resource_owner_secret=resource_owner_secret,
                               verifier=verifier)
         oauth_tokens = oauth.fetch_access_token(access_token_url)
         access_token = oauth_tokens["oauth_token"]
         access_token_secret = oauth_tokens["oauth_token_secret"]
-        return access_token, access_token_secret
+
+        # TODO: Get it to where it loops until the account name is correct
+        # Make sure the account we're posting to is correct
+        if oauth_tokens['screen_name'] != 'nba_scoring_bot':
+            # Exit the script, log into the correct account dummy
+            print("Logged in with the wrong credentials. Exiting...")
+            sys.exit()
+        else:
+            return access_token, access_token_secret
 
     def make_request(self, access_token, access_token_secret):
         oauth = self.oauth = OAuth1Session(self.consumer_key, client_secret=self.consumer_secret,
