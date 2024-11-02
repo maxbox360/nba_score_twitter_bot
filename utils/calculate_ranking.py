@@ -22,22 +22,16 @@ class PlayerRankings:
 
     @staticmethod
     def get_next_player(current_rank, points, current_table):
-        try:
-            next_rank = current_rank - 1
-            next_player = current_table.loc[current_table['PTS_RANK'] == next_rank]
+        next_rank = current_rank - 1
+        while next_rank > 0:
+            next_players = current_table.loc[current_table['PTS_RANK'] == next_rank]
 
-            if not next_player.empty:
-                next_name = next_player['PLAYER_NAME'].values[0]
-                next_player_rank = next_player['PTS_RANK'].values[0]
-                next_player_pts = next_player['PTS'].values[0]
+            if not next_players.empty:
+                next_names = ", ".join(next_players['PLAYER_NAME'].values)  # Join names with commas
+                next_player_rank = next_rank
+                next_player_pts = next_players['PTS'].values[0]  # Points are the same for tied players
                 difference_to_next = f"{(next_player_pts - points + 1):,}"
-            else:
-                next_name = next_player['PLAYER_NAME'].values[0]
-                next_player_rank = next_player['PTS_RANK'].values[0]
-                next_player_pts = next_player['PTS'].values[0]
-                difference_to_next = f"{(next_player_pts - points + 1):,}"
+                return next_names, next_player_rank, difference_to_next
 
-            return next_name, next_player_rank, difference_to_next
-        except IndexError:
-            print("IndexError: Skipping to the next player.")
-            return 'No Player available', 0, "N/A"
+            next_rank -= 1
+
