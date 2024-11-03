@@ -5,7 +5,9 @@ def tied_player_names(tweet_data):
     elif len(tied_players) == 2:
         formatted_names = " and ".join(tied_players)
     else:
-        return tied_players
+        # This is just the next guy, grab him out of the list
+        next_player = tied_players[0]
+        return next_player
     return formatted_names
 
 
