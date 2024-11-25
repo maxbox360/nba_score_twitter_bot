@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  nba_scoring_bot:
+    container_name: nba_bot_container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    volumes:
+      - .:/code
+    command: python3 main.py
+
+
+networks:
+  default:
+    driver: bridge
