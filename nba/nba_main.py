@@ -1,44 +1,33 @@
 import argparse
 import os.path
-import sys
 import time
-import json
+
 import pandas as pd
-import requests
+from atproto import Client
 
 from nba.nba_utils import NBAUtils
 from utils.calculate_ranking import PlayerRankings
-from utils.tweets import TweetComposition
-from utils.utils import Utils
+from utils.posts import PostComposition
 
 pd.set_option('display.max_columns', None)
 
 
 class NBA:
 
-    def __init__(self, consumer_key, consumer_secret):
-        # User-based authentication (API keys and access tokens)
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
         self.nba_utils = NBAUtils()
-        self.tweet_comp = TweetComposition()
+        self.post_comp = PostComposition()
         self.rankings = PlayerRankings()
-        self.utils = Utils(consumer_key, consumer_secret)
 
         parser = argparse.ArgumentParser(description="Running nba_main.py in Debug Mode")
         parser.add_argument('--debug', action='store_true', help='Enable debugging mode')
         self.args = parser.parse_args()
-        self.oauth = None
 
-        self.tweets = []
+        self.posts = []
 
-        if self.args.debug:
-            print("Debugging\n")
-        else:
-            resource_owner_key, resource_owner_secret = self.utils.user_auth()
-            verifier = self.utils.get_auth_url(resource_owner_key)
-            access_token, access_token_secret = self.utils.get_access_token(resource_owner_key,
-                                                                            resource_owner_secret,
-                                                                            verifier)
-            self.oauth = self.utils.make_request(access_token, access_token_secret)
 
     def process_passed_players(self, player_info, passed_players):
 
@@ -56,7 +45,7 @@ class NBA:
                                                         new_table)
         next_ordinal_suffix = self.rankings.get_ordinal_suffix(next_player_rank)
 
-        tweet_data = {
+        post_data = {
             'player_name': player_name,
             'current_rank': current_rank,
             'ordinal_suffix': ordinal_suffix,
@@ -69,13 +58,13 @@ class NBA:
         }
 
         if len(players_passed_info) == 1:
-            tweet = self.tweet_comp.single_player_tweets(tweet_data)
+            post = self.post_comp.single_player_posts(post_data)
         elif len(players_passed_info) == 2:
-            tweet = self.tweet_comp.two_player_tweets(tweet_data)
+            post = self.post_comp.two_player_posts(post_data)
         else:
-            tweet = self.tweet_comp.multi_player_tweets(tweet_data)
+            post = self.post_comp.multi_player_posts(post_data)
 
-        return tweet
+        return post
 
     def check_rank_changes(self, player_id, current_rank, old_table):
         previous_rank = old_table.loc[old_table['PLAYER_ID'] == player_id, 'PTS_RANK'].values
@@ -88,49 +77,22 @@ class NBA:
 
         return None
 
-    def send_tweet(self, payload):
-        try:
-            # Making the request
-            response = self.oauth.post(
-                "https://api.twitter.com/2/tweets",
-                json=payload,
-            )
-            response.raise_for_status()  # Raise HTTPError for bad responses
 
-            print("Tweet posted successfully. Response code: {}".format(response.status_code))
-
-            # Saving the response as JSON
-            json_response = response.json()
-            print(json.dumps(json_response, indent=4, sort_keys=True))
-
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 403:
-                print("403 error: Skipped tweet due to repeated content")
-                return
-            else:
-                raise ValueError(
-                    f"Failed to post tweet. Status Code: {e.response.status_code}. Response: {e.response.text}"
-                )
-
-        if not self.tweets:
-            print("There are no more tweets to post. Exiting")
-            sys.exit()
-
-    def compose_tweet(self, new_table, old_table):
+    def compose_post(self, new_table, old_table):
         if old_table is None:
             print("No previous data found. Saving current data.")
             return
 
-        self.collect_tweets(new_table, old_table)
+        self.collect_posts(new_table, old_table)
 
-        # Check if there are any tweets before proceeding
-        if not self.tweets:
-            print("No tweets to post. Exiting")
+        # Check if there are any posts before proceeding
+        if not self.posts:
+            print("No posts to deliver. Exiting")
             return
 
-        self.publish_tweets()
+        self.send_bluesky_post()
 
-    def collect_tweets(self, new_table, old_table):
+    def collect_posts(self, new_table, old_table):
         # Iterate through each player in the current table to find changes in ranking
         for _, row in new_table.iterrows():
             player_info = {
@@ -145,26 +107,28 @@ class NBA:
             passed_players = self.check_rank_changes(player_info['player_id'], player_info['current_rank'],
                                                      player_info['old_table'])
             if passed_players:
-                tweet = self.process_passed_players(player_info, passed_players)
-                self.tweets.append(tweet)
+                post = self.process_passed_players(player_info, passed_players)
+                self.posts.append(post)
 
-    def publish_tweets(self):
-        # Reverse the order of tweets before posting
-        self.tweets.reverse()
 
-        print(f"There are {len(self.tweets)} tweets to post\n")
-        for tweet in self.tweets:
-            payload = {"text": tweet}
-            if self.args.debug:
-                print(tweet)
-            else:
-                self.send_tweet(payload)
-                if len(self.tweets) > 1:
-                    # Wait for 3 minutes between tweets
-                    minutes = 3 * 60
-                    time.sleep(minutes)
+    def send_bluesky_post(self):
+            client = Client()
+            client.login(self.username, self.password)
+            # Reverse the order of posts before posting
+            self.posts.reverse()
 
-        print("All tweets posted.")
+            print(f"There are {len(self.posts)} posts to post\n")
+            for post in self.posts:
+                if self.args.debug:
+                    print(post)
+                else:
+                    print(f"post: {post}\n")
+                    client.send_post(post)
+                    if len(self.posts) > 1:
+                        # Wait for 3 minutes between posts
+                        minutes = 3 * 60
+                        time.sleep(minutes)
+            print("All posts sent.")
 
     def main(self):
         if self.args.debug:
@@ -187,7 +151,7 @@ class NBA:
             }
 
             old_table = pd.DataFrame(old_data)
-            self.compose_tweet(new_table, old_table)
+            self.compose_post(new_table, old_table)
         else:
             info = {
                 'website': 'https://stats.nba.com',
@@ -209,7 +173,7 @@ class NBA:
 
             # Update the current_week file with the new data
             self.nba_utils.update_table(table=new_table, filename=updated_data)
-            self.compose_tweet(new_table, old_table)
+            self.compose_post(new_table, old_table)
 
             # Update the previous file with this week's table, so we can compare next week
             self.nba_utils.update_table(table=new_table, filename=old_data)

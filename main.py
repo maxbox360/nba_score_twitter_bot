@@ -17,8 +17,8 @@ def get_env(name):
 
 
 if __name__ == "__main__":
-    consumer_key = get_env('CONSUMER_KEY')
-    consumer_secret = get_env('CONSUMER_SECRET')
+    username = get_env('USERNAME')
+    password = get_env('PASSWORD')
 
-    nba = NBA(consumer_key=consumer_key, consumer_secret=consumer_secret)
+    nba = NBA(username=username, password=password)
     nba.main()
