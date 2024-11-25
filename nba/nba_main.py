@@ -87,7 +87,7 @@ class NBA:
 
         # Check if there are any posts before proceeding
         if not self.posts:
-            print("No posts to post. Exiting")
+            print("No posts to deliver. Exiting")
             return
 
         self.send_bluesky_post()
