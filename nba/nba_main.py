@@ -122,7 +122,7 @@ class NBA:
                 if self.args.debug:
                     print(post)
                 else:
-                    print(f"post: {post}")
+                    print(f"post: {post}\n")
                     client.send_post(post)
                     if len(self.posts) > 1:
                         # Wait for 3 minutes between posts
