@@ -18,7 +18,7 @@ jobs:
 
       - name: Run NBA Scoring Bot
         run: |
-          docker-compose up --build --abort-on-container-exit
+          docker-compose up -d
         env:
           BLUESKY_USERNAME: ${{ secrets.BLUESKY_USERNAME }}
           BLUESKY_PASSWORD: ${{ secrets.BLUESKY_PASSWORD }}
