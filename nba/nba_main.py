@@ -117,7 +117,7 @@ class NBA:
             # Reverse the order of posts before posting
             self.posts.reverse()
 
-            print(f"There are {len(self.posts)} posts to post\n")
+            print(f"There is/are {len(self.posts)} post(s) to send to Bluesky\n")
             for post in self.posts:
                 if self.args.debug:
                     print(post)

@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 services:
   nba_scoring_bot:
     container_name: nba_bot_container
