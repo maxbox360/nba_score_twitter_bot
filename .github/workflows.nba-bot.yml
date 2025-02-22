@@ -23,6 +23,6 @@ jobs:
 
       - name: Run NBA Scoring Bot
         env:
-          BLUESKY_USERNAME: ${{ secrets.BLUESKY_USERNAME }}
-          BLUESKY_PASSWORD: ${{ secrets.BLUESKY_PASSWORD }}
+          USERNAME: ${{ secrets.BLUESKY_USERNAME }}
+          PASSWORD: ${{ secrets.BLUESKY_PASSWORD }}
         run: python nba_bot.py
