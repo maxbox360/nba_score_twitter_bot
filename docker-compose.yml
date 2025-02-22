@@ -5,8 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file:
-      - ./.env
+    environment:
+      USERNAME: ${BLUESKY_USERNAME}
+      PASSWORD: ${BLUESKY_PASSWORD}
     volumes:
       - .:/code
     command: python3 main.py
