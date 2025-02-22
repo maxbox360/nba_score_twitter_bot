@@ -25,4 +25,4 @@ jobs:
         env:
           USERNAME: ${{ secrets.BLUESKY_USERNAME }}
           PASSWORD: ${{ secrets.BLUESKY_PASSWORD }}
-        run: python nba_bot.py
+        run: python3 main.py
