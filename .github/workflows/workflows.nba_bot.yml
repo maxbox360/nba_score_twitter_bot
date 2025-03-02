@@ -33,6 +33,15 @@ jobs:
 
       - name: Commit and Push Changes
         run: |
-          git add old_nba_scoring_data.csv new_nba_scoring_data.csv
-          git commit -m "Update NBA scoring data [$(date)]" || echo "No changes to commit"
-          git push
+          if [ -f old_nba_scoring_data.csv ] || [ -f new_nba_scoring_data.csv ]; then
+            git add old_nba_scoring_data.csv new_nba_scoring_data.csv
+            if git diff --cached --quiet; then
+              echo "No changes to commit"
+            else
+              git commit -m "Update NBA scoring data [$(date)]"
+              git push
+            fi
+          else
+            echo "No files to update"
+          fi
+      
