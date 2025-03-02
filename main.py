@@ -17,8 +17,8 @@ def get_env(name):
 
 
 if __name__ == "__main__":
-    username = get_env('USERNAME')
-    password = get_env('PASSWORD')
+    username = get_env('BLUESKY_USERNAME')
+    password = get_env('BLUESKY_PASSWORD')
 
     nba = NBA(username=username, password=password)
     nba.main()
