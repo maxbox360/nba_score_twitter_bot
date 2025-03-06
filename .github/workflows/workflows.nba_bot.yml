@@ -26,6 +26,13 @@ jobs:
           BLUESKY_USERNAME: ${{ secrets.BLUESKY_USERNAME }}
           BLUESKY_PASSWORD: ${{ secrets.BLUESKY_PASSWORD }}
 
+      - name: Debug - Check File Changes
+        run: |
+          echo "Checking if CSV files were modified..."
+          ls -l
+          git status
+          git diff --stat
+
       - name: Configure Git
         run: |
           git config --global user.name "github-actions[bot]"
@@ -33,15 +40,10 @@ jobs:
 
       - name: Commit and Push Changes
         run: |
-          if [ -f old_nba_scoring_data.csv ] || [ -f new_nba_scoring_data.csv ]; then
+          if git status --porcelain | grep -E "old_nba_scoring_data.csv|new_nba_scoring_data.csv"; then
             git add old_nba_scoring_data.csv new_nba_scoring_data.csv
-            if git diff --cached --quiet; then
-              echo "No changes to commit"
-            else
-              git commit -m "Update NBA scoring data [$(date)]"
-              git push
-            fi
+            git commit -m "Update NBA scoring data [$(date)]"
+            git push
           else
-            echo "No files to update"
-          fi
-      
+            echo "No changes to commit"
+          fi    
