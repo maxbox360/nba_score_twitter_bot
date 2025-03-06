@@ -29,7 +29,7 @@ jobs:
       - name: Debug - Check File Changes
         run: |
           echo "Checking if CSV files were modified..."
-          ls -l
+          ls -l nba/
           git status
           git diff --stat
 
@@ -40,10 +40,10 @@ jobs:
 
       - name: Commit and Push Changes
         run: |
-          if git status --porcelain | grep -E "old_nba_scoring_data.csv|new_nba_scoring_data.csv"; then
-            git add old_nba_scoring_data.csv new_nba_scoring_data.csv
+          if git status --porcelain | grep -E "nba/old_nba_scoring_data.csv|nba/new_nba_scoring_data.csv"; then
+            git add nba/old_nba_scoring_data.csv nba/new_nba_scoring_data.csv
             git commit -m "Update NBA scoring data [$(date)]"
             git push
           else
             echo "No changes to commit"
-          fi    
+          fi
