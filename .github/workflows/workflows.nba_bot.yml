@@ -1,4 +1,4 @@
-name: Run NBA Scoring Bot
+name: Run NBA Scoring Bot 
 
 on:
   schedule:
