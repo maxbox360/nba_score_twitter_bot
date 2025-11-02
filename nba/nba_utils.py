@@ -1,4 +1,5 @@
 import os
+from time import sleep
 
 import pandas as pd
 import requests
@@ -13,10 +14,25 @@ class NBAUtils:
 
     @staticmethod
     def fetch_nba_data(url):
-        r = requests.get(url=url).json()
-        table_headers = r['resultSet']['headers']
-        table = pd.DataFrame(r['resultSet']['rowSet'], columns=table_headers)
-        return table[:250]
+        retries = 5
+        backoff = 2
+        for attempt in range(1, retries + 1):
+            try:
+                response = requests.get(url=url, timeout=10).json()
+                response.raise_for_status()
+                r = response.json()
+
+                if 'ruleSet' not in r:
+                    print(f"[Attempt {attempt}] resultSet missing. Response: {r}")
+
+                table_headers = r['resultSet']['headers']
+                table = pd.DataFrame(r['resultSet']['rowSet'], columns=table_headers)
+                return table[:250]
+            except (requests.RequestException, ValueError) as e:
+                wait = backoff * (2 ** (attempt - 1))
+                print(f"[Attempt {attempt}] Failed: {e} Retrying in {wait}s...")
+                sleep(wait)
+        raise RuntimeError(f"Failed to fetch NBA data from {url} after {retries} retries")
 
     @staticmethod
     def update_table(table, filename):
