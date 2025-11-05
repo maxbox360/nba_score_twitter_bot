@@ -22,7 +22,7 @@ class NBAUtils:
                 response.raise_for_status()
                 r = response.json()
 
-                if 'ruleSet' not in r:
+                if 'resultSet' not in r:
                     print(f"[Attempt {attempt}] resultSet missing. Response: {r}")
 
                 table_headers = r['resultSet']['headers']
