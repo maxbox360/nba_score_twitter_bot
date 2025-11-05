@@ -18,7 +18,7 @@ class NBAUtils:
         backoff = 2
         for attempt in range(1, retries + 1):
             try:
-                response = requests.get(url=url, timeout=10).json()
+                response = requests.get(url=url, timeout=10)
                 response.raise_for_status()
                 r = response.json()
 
