@@ -156,8 +156,8 @@ class NBA:
             info = {
                 'website': 'https://stats.nba.com',
                 'stats': 'PTS',
-                'season_type': 'Regular%20',
-                'season': 'ALL%20'
+                'season_type': 'Regular ',
+                'season': 'ALL '
             }
 
             url = self.nba_utils.customize_nba_url(info)
