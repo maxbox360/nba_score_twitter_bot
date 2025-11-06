@@ -14,14 +14,23 @@ class NBAUtils:
 
     @staticmethod
     def fetch_nba_data(url):
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                          "AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/118.0.5993.117 Safari/537.36",
+            "Referer": "https://www.nba.com/",
+            "Origin": "https://www.nba.com",
+        }
         retries = 5
         backoff = 2
         for attempt in range(1, retries + 1):
             try:
-                response = requests.get(url=url, timeout=10)
+                response = requests.get(url, headers=headers)
+                if response.status_code != 200:
+                    print("Status:", response.status_code)
+                    print("Response text:", response.text)
                 response.raise_for_status()
                 r = response.json()
-
                 if 'resultSet' not in r:
                     print(f"[Attempt {attempt}] resultSet missing. Response: {r}")
 
