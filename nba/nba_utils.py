@@ -8,8 +8,13 @@ import requests
 class NBAUtils:
     @staticmethod
     def customize_nba_url(info):
-        url = f'{info["website"]}/stats/leagueLeaders?ActiveFlag=No&LeagueID=00&PerMode=Totals&Scope=S&' \
-              f'Season={info["season"]}Time&SeasonType={info["season_type"]}Season&StatCategory={info["stats"]}'
+        url = (
+            f'{info["website"]}/stats/leagueLeaders?'
+            f'ActiveFlag=No&LeagueID=00&PerMode=Totals&Scope=S&'
+            f'Season={info["season"]}&SeasonType={info["season_type"]}&'
+            f'StatCategory={info["stats"]}'
+        )
+
         return url
 
     @staticmethod
