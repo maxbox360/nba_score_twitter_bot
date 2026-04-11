@@ -48,7 +48,10 @@ class NBAUtils:
                 response.raise_for_status()
                 r = response.json()
                 if 'resultSet' not in r:
-                    raise ValueError(f"resultSet missing in response: {r}")
+                    logger.debug("Unexpected API response payload: %s", r)
+                    raise ValueError(
+                        f"resultSet missing in response (keys: {list(r.keys())})"
+                    )
 
                 table_headers = r['resultSet']['headers']
                 table = pd.DataFrame(r['resultSet']['rowSet'], columns=table_headers)
