@@ -52,8 +52,9 @@ class NBAUtils:
 
                 table_headers = r['resultSet']['headers']
                 table = pd.DataFrame(r['resultSet']['rowSet'], columns=table_headers)
-                logger.info("Fetched %s NBA rows successfully.", len(table[:250]))
-                return table[:250]
+                limited_table = table[:250]
+                logger.info("Fetched %s NBA rows successfully.", len(limited_table))
+                return limited_table
             except (requests.RequestException, ValueError) as e:
                 last_error = e
                 wait = backoff * (2 ** (attempt - 1))
