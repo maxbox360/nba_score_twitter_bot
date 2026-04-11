@@ -85,7 +85,7 @@ class NBA:
 
     def compose_post(self, new_table, old_table):
         if old_table is None:
-            logger.warning("No previous data found. Saving current data and skipping posts.")
+            logger.warning("No previous data found. Skipping post composition.")
             return
 
         self.collect_posts(new_table, old_table)
