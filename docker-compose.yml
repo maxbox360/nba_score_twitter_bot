@@ -8,6 +8,8 @@ services:
     environment:
       BLUESKY_USERNAME: ${BLUESKY_USERNAME}
       BLUESKY_PASSWORD: ${BLUESKY_PASSWORD}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      PYTHONUNBUFFERED: "1"
     volumes:
       - .:/code
     command: python3 main.py

@@ -1,22 +1,19 @@
-import os
+import logging
 
 from dotenv import load_dotenv
 
 from nba.nba_main import NBA
+from utils.settings import configure_logging, get_env
 
 
-def get_env(name):
-    try:
-        load_dotenv()
-        secret = os.getenv(name)
-
-        return secret
-
-    except Exception as e:
-        print(f"Error loading secrets: {e}")
+logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
+    load_dotenv()
+    configure_logging()
+    logger.info("Starting NBA Bluesky bot")
+
     username = get_env('BLUESKY_USERNAME')
     password = get_env('BLUESKY_PASSWORD')
 
